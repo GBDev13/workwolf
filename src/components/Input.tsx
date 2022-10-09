@@ -23,7 +23,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           name={name}
           id={name}
           className={classNames(
-            "h-8 border border-[#c1c1c1] p-5 rounded-md",
+            "h-8 border border-[#c1c1c1] py-5 px-1 rounded-md sm:p-5",
             { "border-warning": !!fieldError },
             className
           )}
