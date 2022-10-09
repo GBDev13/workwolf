@@ -74,11 +74,11 @@ const Home: NextPage<HomeProps> = ({ pipelineData }) => {
         <header className="flex flex-col items-center border-b border-black pb-6">
           <Image
             src="/workwolf.svg"
-            width="50"
-            height="50"
+            width="40"
+            height="40"
             alt="Workwolf logo (A wolf drawn in strokes)"
           />
-          <h1 className="text-4xl font-bold mt-7 text-center">
+          <h1 className="text-4xl font-bold mt-5 text-center">
             {pipelineData.jobTitle}
           </h1>
         </header>
