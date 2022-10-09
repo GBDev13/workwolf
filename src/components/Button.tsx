@@ -12,6 +12,7 @@ export function Button({
   className,
   loading,
   children,
+  disabled,
   ...rest
 }: ButtonProps) {
   return (
@@ -31,6 +32,7 @@ export function Button({
           "py-0 px-0 underline": variant === "link",
         }
       )}
+      disabled={disabled || loading}
       {...rest}
     >
       {loading ? (

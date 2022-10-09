@@ -1,11 +1,52 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import { FormProvider, useForm } from "react-hook-form";
 import { Button } from "../components/Button";
 import { Dropzone } from "../components/Dropzone";
 import { Input } from "../components/Input";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import toast from "react-hot-toast";
+
+const formSchema = z.object({
+  firstName: z.string().min(3, {
+    message: "First name must be at least 3 characters",
+  }),
+  lastName: z.string().min(3, {
+    message: "Last name must be at least 3 characters",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address",
+  }),
+  file: z
+    .object({
+      path: z.string(),
+    })
+    .optional(),
+});
+
+export type PipelineFormData = z.infer<typeof formSchema>;
 
 const Home: NextPage = () => {
+  const methods = useForm<PipelineFormData>({
+    resolver: zodResolver(formSchema),
+  });
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = methods;
+
+  async function onSubmit(form: PipelineFormData) {
+    console.log(form);
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    reset();
+    toast.success("Form submitted successfully");
+  }
+
   return (
     <main className="bg-[#f5f2ef] w-full min-h-screen justify-center items-center flex py-5">
       <Head>
@@ -25,7 +66,7 @@ const Home: NextPage = () => {
 
         <div className="mb-12 text-center">
           <div className="flex flex-col my-16 items-center">
-            <span className="text-xl mb-8 font-medium">
+            <span className="text-xl mb-6 font-medium">
               This pipeline belongs to
             </span>
             <h2 className="font-bold text-2xl">Workwolf</h2>
@@ -40,17 +81,21 @@ const Home: NextPage = () => {
           </p>
         </div>
 
-        <form className="px-8">
-          <fieldset className="flex flex-col gap-9">
-            <Input label="First Name" name="firstName" />
-            <Input label="Last Name" name="lastName" />
-            <Input label="Email" type="email" name="email" />
+        <FormProvider {...methods}>
+          <form className="px-8" onSubmit={handleSubmit(onSubmit)}>
+            <fieldset className="flex flex-col gap-9">
+              <Input label="First Name" {...register("firstName")} />
+              <Input label="Last Name" {...register("lastName")} />
+              <Input label="Email" type="email" {...register("email")} />
 
-            <Dropzone label="Upload Resume (Optional)" />
+              <Dropzone label="Upload Resume (Optional)" />
 
-            <Button type="submit">Submit</Button>
-          </fieldset>
-        </form>
+              <Button type="submit" loading={isSubmitting}>
+                Submit
+              </Button>
+            </fieldset>
+          </form>
+        </FormProvider>
 
         <footer className="mt-16 flex flex-col items-center">
           <div className="w-full">
