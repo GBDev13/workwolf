@@ -1,4 +1,4 @@
-import type { NextPage } from "next";
+import type { GetStaticProps, NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import { FormProvider, useForm } from "react-hook-form";
@@ -8,6 +8,9 @@ import { Input } from "../components/Input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import toast from "react-hot-toast";
+import { Dialog } from "../components/Dialog";
+import axios from "axios";
+import { parseHTMLWithStyles } from "../utils/parseHTMLWithStyles";
 
 const formSchema = z.object({
   firstName: z.string().min(3, {
@@ -28,7 +31,19 @@ const formSchema = z.object({
 
 export type PipelineFormData = z.infer<typeof formSchema>;
 
-const Home: NextPage = () => {
+type IPipelineData = {
+  jobTitle: string;
+  description: string;
+  companyCountry: string;
+  companyCity: string;
+  companyOrName: string;
+};
+
+type HomeProps = {
+  pipelineData: IPipelineData;
+};
+
+const Home: NextPage<HomeProps> = ({ pipelineData }) => {
   const methods = useForm<PipelineFormData>({
     resolver: zodResolver(formSchema),
   });
@@ -47,13 +62,15 @@ const Home: NextPage = () => {
     toast.success("Form submitted successfully");
   }
 
+  const parsedDescription = parseHTMLWithStyles(pipelineData.description);
+
   return (
-    <main className="bg-[#f5f2ef] w-full min-h-screen justify-center items-center flex py-5">
+    <main className="bg-[#f5f2ef] w-full min-h-screen justify-center items-center flex py-5 px-4">
       <Head>
         <title>Workwolf</title>
       </Head>
 
-      <section className="bg-white p-8 rounded max-w-[515px] w-full">
+      <section className="bg-white p-4 rounded max-w-[515px] w-full sm:p-8">
         <header className="flex flex-col items-center border-b border-black pb-6">
           <Image
             src="/workwolf.svg"
@@ -61,7 +78,7 @@ const Home: NextPage = () => {
             height="50"
             alt="Workwolf logo (A wolf drawn in strokes)"
           />
-          <h1 className="text-4xl font-bold mt-7">GraphStax</h1>
+          <h1 className="text-4xl font-bold mt-7">{pipelineData.jobTitle}</h1>
         </header>
 
         <div className="mb-12 text-center">
@@ -69,11 +86,13 @@ const Home: NextPage = () => {
             <span className="text-xl mb-6 font-medium">
               This pipeline belongs to
             </span>
-            <h2 className="font-bold text-2xl">Workwolf</h2>
-            <span className="font-medium mt-1">Toronto, Canada</span>
-            <Button variant="link" className="mt-4 font-medium">
-              View Job Description
-            </Button>
+            <h2 className="font-bold text-2xl">{pipelineData.companyOrName}</h2>
+            <span className="font-medium mt-1">{`${pipelineData.companyCity}, ${pipelineData.companyCountry}`}</span>
+            <Dialog title="Job Description" content={parsedDescription}>
+              <Button variant="link" className="mt-4 font-medium">
+                View Job Description
+              </Button>
+            </Dialog>
           </div>
 
           <p className="font-medium">
@@ -82,7 +101,7 @@ const Home: NextPage = () => {
         </div>
 
         <FormProvider {...methods}>
-          <form className="px-8" onSubmit={handleSubmit(onSubmit)}>
+          <form className="px-0 sm:px-8" onSubmit={handleSubmit(onSubmit)}>
             <fieldset className="flex flex-col gap-9">
               <Input label="First Name" {...register("firstName")} />
               <Input label="Last Name" {...register("lastName")} />
@@ -100,17 +119,37 @@ const Home: NextPage = () => {
         <footer className="mt-16 flex flex-col items-center">
           <div className="w-full">
             <hr className="w-full border-primary" />
-            <p className="text-center text-lg text-primary bg-white translate-y-[-50%] max-w-content m-auto px-6">
+            <p className="text-center text-lg text-primary bg-white translate-y-[-50%] max-w-content m-auto px-1 sm:px-6">
               Already have an account?
             </p>
           </div>
-          <Button variant="secondary" className="font-medium">
+          <Button variant="secondary" className="font-medium px-16">
             Sign In
           </Button>
         </footer>
       </section>
     </main>
   );
+};
+
+export const getStaticProps: GetStaticProps = async () => {
+  const { data } = await axios<IPipelineData>(
+    "https://api.prod.workwolf.com/business/public/job-link/4KGQ5SRD"
+  );
+
+  const { data: countryData } = await axios(
+    `https://restcountries.com/v3.1/alpha/${data.companyCountry}`
+  );
+
+  return {
+    props: {
+      pipelineData: {
+        ...data,
+        companyCountry: countryData[0].name.common,
+      },
+    },
+    revalidate: 60 * 60 * 24, // 24 hours
+  };
 };
 
 export default Home;
