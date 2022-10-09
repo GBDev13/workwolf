@@ -14,7 +14,7 @@ export function Dialog({ title, content, children }: DialogProps) {
       <DialogPrimitive.Trigger asChild>{children}</DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 bg-black/20" />
-        <DialogPrimitive.Content className="fixed w-full max-w-[900px] rounded-t-lg overflow-hidden top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white flex flex-col ">
+        <DialogPrimitive.Content className="fixed w-[calc(100%-2rem)] max-w-[900px] rounded-t-lg overflow-hidden top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white flex flex-col ">
           <DialogPrimitive.Title className="w-full bg-[#221f20] text-white p-4 text-2xl flex items-center">
             {title}
 
