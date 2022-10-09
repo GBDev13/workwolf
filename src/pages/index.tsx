@@ -78,7 +78,9 @@ const Home: NextPage<HomeProps> = ({ pipelineData }) => {
             height="50"
             alt="Workwolf logo (A wolf drawn in strokes)"
           />
-          <h1 className="text-4xl font-bold mt-7">{pipelineData.jobTitle}</h1>
+          <h1 className="text-4xl font-bold mt-7 text-center">
+            {pipelineData.jobTitle}
+          </h1>
         </header>
 
         <div className="mb-12 text-center">
